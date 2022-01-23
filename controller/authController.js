@@ -9,7 +9,6 @@ const signToken = (data) => {
 };
 
 const createSendToken = (user, statusCode, res) => {
-  console.log("user", user);
   const { name, surname } = user;
   const data = {
     name,
@@ -80,8 +79,15 @@ exports.login = async (req, res, next) => {
     }
 
     const user = await User.findOne({ email });
+    if (!user) {
+      // return next(AppError(`Ecode ${eCode} not found`, 404));
+      return res.status(404).json({
+        status: "fail",
+        message: `Incorrect email or password`,
+      });
+    }
     const correct = await user.correctPassword(password, user.password);
-    if (!user || !correct) {
+    if (!correct) {
       // return next(AppError(`Ecode ${eCode} not found`, 404));
       return res.status(404).json({
         status: "fail",
