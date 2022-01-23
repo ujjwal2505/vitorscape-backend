@@ -11,21 +11,34 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "surname is required"],
     },
-    eCode: {
+    email: {
       type: String,
-      required: [true, "Ecode is required"],
+      required: [true, "Email is required"],
       unique: true,
     },
+    phone: {
+      type: String,
+      required: [true, "phone number is required"],
+    },
+    address: {
+      type: String,
+      required: [true, "address is required"],
+    },
+    // eCode: {
+    //   type: String,
+    //   required: [true, "Ecode is required"],
+    //   unique: true,
+    // },
     password: {
       type: String,
       required: [true, "Password is required"],
       // minlength: [8, "Password length should be atleast 8 characters"],
     },
-    userType: {
-      type: String,
-      required: [true, "user type is required"],
-      enum: ["ADMIN", "EMPLOYEE"],
-    },
+    // userType: {
+    //   type: String,
+    //   required: [true, "user type is required"],
+    //   enum: ["ADMIN", "EMPLOYEE"],
+    // },
   },
   { timestamps: true }
 );

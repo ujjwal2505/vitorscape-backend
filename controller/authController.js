@@ -9,12 +9,11 @@ const signToken = (data) => {
 };
 
 const createSendToken = (user, statusCode, res) => {
-  const { name, surname, eCode, userType } = user;
+  console.log("user", user);
+  const { name, surname } = user;
   const data = {
     name,
     surname,
-    eCode,
-    userType,
   };
   const token = signToken(data);
 
@@ -27,36 +26,40 @@ const createSendToken = (user, statusCode, res) => {
 
 exports.signup = async (req, res) => {
   try {
-    const { name, surname, password, userType } = req.body;
-    if (!name || !surname || !password || !userType) {
+    const { name, surname, password, email, phone, address } = req.body;
+
+    if (!name || !surname || !password || !email || !phone || !address) {
       return res.status(404).json({
         status: "fail",
         message: "Please Fill all the details",
       });
     }
-    let random = Math.floor(1000 + Math.random() * 9000);
-    console.log(await User.find({ eCode: random }));
+    // let random = Math.floor(1000 + Math.random() * 9000);
+    // console.log(await User.find({ eCode: random }));
 
-    let check;
-    do {
-      if (await User.find({ eCode: random })) {
-        console.log(random);
-        random = Math.floor(1000 + Math.random() * 9000);
-        check = true;
-      }
-      check = false;
-    } while (check);
+    // let check;
+    // do {
+    //   if (await User.find({ eCode: random })) {
+    //     console.log(random);
+    //     random = Math.floor(1000 + Math.random() * 9000);
+    //     check = true;
+    //   }
+    //   check = false;
+    // } while (check);
 
-    const newUser = new User({
-      name,
-      surname,
-      password,
-      userType,
-      eCode: random,
-    });
-    await newUser.save();
+    const newUser = await User.create(req.body);
+    // const newUser = new User({
+    //   name,
+    //   surname,
+    //   password,
+    //   email,
+    //   phone,
+    //   address,
+    // });
+    // console.log("new:", newUser);
+    // await newUser.save();
 
-    createSendToken(newUser, 201, res);
+    await createSendToken(newUser, 201, res);
   } catch (error) {
     res.status(404).json({
       status: "fail",
@@ -67,32 +70,32 @@ exports.signup = async (req, res) => {
 
 exports.login = async (req, res, next) => {
   try {
-    const { eCode, password } = req.body;
-    if (!eCode || !password) {
+    const { email, password } = req.body;
+    if (!email || !password) {
       return res.status(404).json({
         status: "fail",
-        message: "Please provide ECode and password",
+        message: "Please provide Email and password",
       });
       // return next(new AppError("Please provide ECode and password", 404));
     }
 
-    const user = await User.findOne({ eCode });
-    if (!user) {
+    const user = await User.findOne({ email });
+    const correct = await user.correctPassword(password, user.password);
+    if (!user || !correct) {
       // return next(AppError(`Ecode ${eCode} not found`, 404));
       return res.status(404).json({
         status: "fail",
-        message: `Ecode ${eCode} not found`,
+        message: `Incorrect email or password`,
       });
     }
-    const correct = await user.correctPassword(password, user.password);
 
-    if (!correct) {
-      // return next(new AppError("Wrong password", 404));
-      return res.status(404).json({
-        status: "fail",
-        message: "Wrong password",
-      });
-    }
+    // if (!correct) {
+    //   // return next(new AppError("Wrong password", 404));
+    //   return res.status(404).json({
+    //     status: "fail",
+    //     message: "Wrong password",
+    //   });
+    // }
     createSendToken(user, 200, res);
   } catch (error) {
     console.log(error);
